@@ -1,0 +1,17 @@
+
+‰
+java:S2184#"FCast one of the operands of this multiplication operation to a "long".(“€Ñ8Ÿè‚Ëõ1J$a47c5bc2-8ab2-4aab-a8ef-556a95f90456
+
+java:S2259-"FA "NullPointerException" could be thrown; "fileName" is nullable here.(Ûï²—úÿÿÿÿ8´®‰Ëõ1J$f3e8c7c6-3f23-4a58-a11e-86d16de97089
+
+java:S1128"LRemove this unused import 'com.amazonaws.auth.AWSStaticCredentialsProvider'.( šÎ°8 ‚Ïõ1J$60d84814-4e6e-4df3-aee8-df8a0c99522c
+‹
+java:S1128"CRemove this unused import 'com.amazonaws.auth.BasicAWSCredentials'.(Œ¿æÒûÿÿÿÿ8‚ ‚Ïõ1J$34aa1162-91a2-4799-a712-916f39adf743
+
+java:S1128"VRemove this unused import 'com.amazonaws.auth.EnvironmentVariableCredentialsProvider'.(áÉè»ıÿÿÿÿ8‚ ‚Ïõ1J$a291ca4a-9a54-42e6-b182-026b89aad29f
+•
+java:S1128"RRemove this unused import 'com.amazonaws.auth.profile.ProfileCredentialsProvider'.(•æŠ8‚ ‚Ïõ1J$11c37e07-6b10-463d-9033-e00e6fef491d
+–
+java:S1128"NRemove this unused import 'com.br.multicloudecore.awsmodule.config.AWSConfig'.(ä³ÕŠøÿÿÿÿ8‚ ‚Ïõ1J$5f993043-0af8-45ae-a91d-2fb6614638f0
+›
+java:S1128"SRemove this unused import 'org.springframework.beans.factory.annotation.Autowired'.(¡¸Îùÿÿÿÿ8‚ ‚Ïõ1J$0ea33ccb-e985-4cc6-a1b2-21f4d4eccf4d

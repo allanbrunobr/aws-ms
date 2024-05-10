@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="en" charset="UTF-8">
+<head>
+
+    <th:block th:replace="~{fragments/aws-common-head-libs :: aws-common-head-libs}"></th:block>
+
+    <title>e-Core - AWS</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/aws-menu-fragment :: menu-fragment}"></th:block>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            AWS Rekognition
+        </div>
+        <div class="card-body">
+            <form class="needs-validation" novalidate th:action="@{/rekognitionFace}" method="post" enctype="multipart/form-data">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-md-6 mb-3">
+                        <div class="card" style="height: 180px;">
+                            <div class="card-image">
+                                <img src="/images/no-picture.png" class="card-img-top" alt="" id="uploaded-image" style="object-fit: cover; height: 80%;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-group">
+                            <label for="file-upload" class="custom-file-upload">
+                                <i class="fas fa-cloud-upload-alt"></i> Choose your photo
+                            </label>
+                            <input type="file" id="file-upload" name="file" accept="image/png, image/jpeg">
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-md-12">
+                                <button class="btn btn-primary" type="submit">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Resultado da análise de imagem -->
+
+
+
+
+<script>
+    const fileUpload = document.getElementById('file-upload');
+    const uploadedImage = document.getElementById('uploaded-image');
+
+    fileUpload.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            uploadedImage.src = e.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            uploadedImage.src = '';
+        }
+    });
+</script>
+
+
+<th:block th:replace="~{fragments/aws-commons-js :: aws-commons-js}"></th:block>
+
+</body>
+
+</html>

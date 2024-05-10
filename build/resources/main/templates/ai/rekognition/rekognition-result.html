@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <th:block th:replace="~{fragments/aws-common-head-libs :: aws-common-head-libs}"></th:block>
+
+    <title>e-Core - GCP</title>
+
+</head>
+<body>
+<th:block th:replace="~{fragments/aws-menu-fragment :: menu-fragment}"></th:block>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            Photo Analysis Result
+        </div>
+        <div class="card-body">
+            <div th:replace="~{fragments/rekognition/face-container :: face-container}"></div>
+            <div th:each="faceInfo, iterStat : ${faceInfoList}">
+                <div th:replace="~{fragments/rekognition/face-info :: face-info}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/aws-commons-js :: aws-commons-js}"></th:block>
+
+</body>
+
+</html>

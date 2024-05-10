@@ -1,0 +1,6 @@
+<div class="face-container" th:fragment="face-container">
+    <div class="card" style="width: 24rem;">
+        <img th:src="'data:image/jpeg;base64,' + ${base64EncodedImage}" th:data-src="'data:image/jpeg;base64,'
+        + ${base64EncodedImage}" alt="Captured image of a face" class="card-img-top" style="max-width: 100%; height: auto;">
+    </div>
+</div>

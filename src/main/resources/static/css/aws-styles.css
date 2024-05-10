@@ -1,0 +1,117 @@
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+
+.loginForm {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.loginForm h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.loginForm h4 {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.inputText {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #232f3e;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #00bbff;
+}
+
+.button-secondary {
+    background-color: #f6f6f6; /* Cinza AWS */
+    color: #232f3e; /* Azul AWS */
+}
+
+button:focus {
+    outline: none;
+}
+
+.signUpButton {
+    display: none;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #28a745;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.signUpButton:hover {
+    background-color: #218838;
+}
+
+.menu-container {
+    background-color: #232f3e; /* Azul escuro AWS */
+    padding: 10px;
+    border-bottom: 2px solid #00bbff; /* Azul claro AWS */
+}
+
+.nav-pills .nav-link {
+    color: #ffffff; /* Branco AWS */
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #00bbff; /* Azul claro AWS */
+}
+
+.nav-pills .nav-link.active {
+    background-color: #00bbff; /* Azul claro AWS */
+    color: #ffffff; /* Branco AWS */
+}
+
+.dropdown-menu {
+    border: none;
+    background-color: #232f3e; /* Azul escuro AWS */
+}
+
+.dropdown-item {
+    color: #ffffff; /* Branco AWS */
+}
+
+.dropdown-item:hover {
+    background-color: #00bbff; /* Azul claro AWS */
+    color: #ffffff; /* Branco AWS */
+}
+
+#logout-link {
+    color: #ffffff; /* Branco AWS */
+}
+
+#logout-link:hover {
+    color: #00bbff; /* Azul claro AWS */
+}
+

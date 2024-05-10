@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="en" charset="UTF-8">
+<head>
+
+    <th:block th:replace="~{fragments/aws-common-head-libs :: aws-common-head-libs}"></th:block>
+
+    <title>e-Core - AWS</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/aws-menu-fragment :: menu-fragment}"></th:block>
+
+
+
+
+<h1>Capturar Foto</h1>
+<video id="video" width="640" height="480" autoplay></video>
+<button id="captureButton">Capturar Foto</button>
+<canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('captureButton');
+
+    // Solicita permissão para acessar a câmera
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(error => {
+            console.error('Erro ao acessar a câmera:', error);
+        });
+
+    // Captura a imagem ao clicar no botão
+    captureButton.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Converte a imagem para um array de bytes
+        const imageData = canvas.toDataURL('image/png');
+        const imageBytes = atob(imageData.split(',')[1]);
+        const arrayBuffer = new ArrayBuffer(imageBytes.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < imageBytes.length; i++) {
+            uint8Array[i] = imageBytes.charCodeAt(i);
+        }
+
+        // Envia a requisição para o servidor
+        fetch('/uploadPhoto', {
+            method: 'POST',
+            body: uint8Array
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Imagem enviada com sucesso.');
+                } else {
+                    console.error('Erro ao enviar a imagem.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar a imagem:', error);
+            });
+    });
+</script>
+
+
+
+<th:block th:replace="~{fragments/aws-commons-js :: aws-commons-js}"></th:block>
+
+</body>
+
+</html>
