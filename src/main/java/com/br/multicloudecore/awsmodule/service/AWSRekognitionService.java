@@ -29,10 +29,15 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * The AWSRekognitionService class provides functionality for detecting faces in images using the AWS Rekognition service.
+ * It uses the AWS SDK to interact with the Rekognition API and returns a list of {@link FaceInfoWithPositionDTO} objects
+ * containing the detected face details and bounding box information.
+ */
 @Service
 public class AWSRekognitionService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AWSS3Service.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AWSRekognitionService.class);
 
     private final AWSCredentialsProvider awsCredentialsProvider;
 
@@ -42,14 +47,20 @@ public class AWSRekognitionService {
         this.awsCredentialsProvider = awsCredentialsProvider;
     }
 
+    /**
+     * Detects faces in the provided image using AWS Rekognition and returns a list of {@link FaceInfoWithPositionDTO} objects
+     * containing the detected face details and bounding box information.
+     *
+     * @param file The image file to be analyzed.
+     * @return A list of {@link FaceInfoWithPositionDTO} objects containing the detected face details and bounding box information.
+     */
     public List<FaceInfoWithPositionDTO> detectFacesAndAgeRekognition(MultipartFile file) {
         List<FaceInfoWithPositionDTO> faceInfoList = new ArrayList<>();
-           // Criar o caminho para a pasta de recursos
+
             try (InputStream inputStream = file.getInputStream()) {
                 byte[] imageBytes = IOUtils.toByteArray(inputStream);
                 ByteBuffer imageByteBuffer = ByteBuffer.wrap(imageBytes);
 
-                // continuar com a análise da imagem como antes
             AmazonRekognition rekognitionClient = AmazonRekognitionClientBuilder.standard()
                     .withCredentials(awsCredentialsProvider)
                     .build();
@@ -68,13 +79,23 @@ public class AWSRekognitionService {
                     faceInfoList.add(faceInfo);
                 }
             }
-        } catch (AmazonRekognitionException | IOException e) {
-            LOGGER.error("Error occurred during face detection with Rekognition", e);
-        }
+            } catch (AmazonRekognitionException e) {
+                LOGGER.error("Error occurred during face detection with Rekognition", e);
+            } catch (IOException e) {
+                LOGGER.error("Error occurred while reading image file", e);
+            }
 
         return faceInfoList;
-
     }
+
+    /**
+     * Processes the provided image by drawing bounding boxes around detected faces and returns the processed image as a Base64 encoded string.
+     *
+     * @param imageBytes The image bytes to be processed.
+     * @param faceInfoWithPositionDTOS The list of {@link FaceInfoWithPositionDTO} objects containing the detected face details and bounding box information.
+     * @return The processed image as a Base64 encoded string.
+     * @throws IOException If an error occurs while processing the image.
+     */
     public String processImage(byte[] imageBytes, List<FaceInfoWithPositionDTO> faceInfoWithPositionDTOS) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
         JPanel panel = new JPanel() {
@@ -97,7 +118,7 @@ public class AWSRekognitionService {
                     int blue = ((i + 1) * 77) % 256;
                     Color faceColor = new Color(red, green, blue);
 
-                    g2d.setStroke(new BasicStroke(5)); // Set the line width to 2 pixels
+                    g2d.setStroke(new BasicStroke(5));
                     g2d.setColor(faceColor);
                     g2d.drawRect(left, top, width, height);
 
