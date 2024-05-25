@@ -1,4 +1,4 @@
-package com.br.multicloudecore.awsmodule.controller;
+package com.br.multicloudecore.awsmodule.controllers;
 
 import com.br.multicloudecore.awsmodule.service.AWSRekognitionService;
 import com.br.multicloudecore.awsmodule.service.AWSS3Service;
