@@ -29,6 +29,8 @@ dependencies {
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.1'
 
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-vault-config', version: '4.1.1'
+
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
