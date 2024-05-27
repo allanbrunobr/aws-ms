@@ -108,8 +108,7 @@ public class AwsController {
    *
    * @param imageData the captured photo data
    * @return a redirect to the main page of the AWS module
-   */
-  @PostMapping("/uploadPhoto")
+   */@PostMapping("/uploadPhoto")
   public String uploadPhoto(@RequestBody byte[] imageData) {
     try {
       ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);

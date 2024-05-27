@@ -9,8 +9,12 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport;
+import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
@@ -34,9 +38,15 @@ public class AWSS3Service {
     @Value("${spring.cloud.aws.s3.bucket-name}")
     private String bucketName;
 
+    @Autowired
+    private VaultTemplate vaultTemplate;
+
     public void storeFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+       VaultResponse credentialsResponse = vaultTemplate.read("/secret/data/aws/");
+
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             LOGGER.error("File extension '{}' is not allowed for upload", extension);
