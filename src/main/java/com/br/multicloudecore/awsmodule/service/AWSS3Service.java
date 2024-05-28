@@ -1,14 +1,13 @@
 package com.br.multicloudecore.awsmodule.service;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.*;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.br.multicloudecore.awsmodule.providers.DynamicAWSCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,32 +35,25 @@ public class AWSS3Service {
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif", "pdf", "txt");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-    private final AmazonS3 s3Client;
     private final String bucketName;
-    private final VaultService vaultService;
+    private final VaultTemplate vaultTemplate;
+    private AmazonS3 s3Client;
+
+    private final DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider;
 
     @Autowired
     public AWSS3Service(
             @Value("${spring.cloud.aws.s3.bucket-name}") String bucketName,
-            VaultService vaultService
+            VaultTemplate  vaultTemplate, DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider
     ) {
         this.bucketName = bucketName;
-        this.vaultService = vaultService;
-
-        AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(
-                        vaultService.getAwsCredentials().get("access_key_id").toString(),
-                        vaultService.getAwsCredentials().get("secret_access_key").toString()
-                )
-        );
-
-        this.s3Client = AmazonS3ClientBuilder.standard()
-                .withRegion(Regions.US_EAST_1)
-                .withCredentials(credentialsProvider)
-                .build();
+        this.vaultTemplate = vaultTemplate;
+        this.dynamicAWSCredentialsProvider = dynamicAWSCredentialsProvider;
+        this.s3Client = AmazonS3ClientBuilder.standard().build();
+        waitForVaultCredentials();
     }
 
-    public void storeFile(MultipartFile file) {
+      public void storeFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 
@@ -74,7 +66,6 @@ public class AWSS3Service {
             LOGGER.error("File size {} exceeds the maximum allowed size of {}", file.getSize(), MAX_FILE_SIZE);
             throw new IllegalArgumentException("File size exceeds the maximum allowed size");
         }
-
 
         try (InputStream inputStream = file.getInputStream()) {
             ObjectMetadata metadata = new ObjectMetadata();
@@ -101,6 +92,28 @@ public class AWSS3Service {
         byte[] imageBytes = os.toByteArray();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
 
-        s3Client.putObject(bucketName, fileName, inputStream, null);
+        this.s3Client.putObject(bucketName, fileName, inputStream, null);
     }
+
+    private void waitForVaultCredentials() {
+        new Thread(() -> {
+            boolean credentialsAvailable = false;
+            while (!credentialsAvailable) {
+                try {
+                    this.s3Client = AmazonS3ClientBuilder.standard()
+                            .withCredentials(new AWSStaticCredentialsProvider(dynamicAWSCredentialsProvider.getCredentials()))
+                            .build();
+                    credentialsAvailable = true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(1000); // Wait for 1 second before retrying
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }).start();
+    }
+
 }

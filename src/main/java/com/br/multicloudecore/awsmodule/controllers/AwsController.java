@@ -45,7 +45,7 @@ public class AwsController {
   @GetMapping("/")
     public String loginAws() {
 
-    return "redirect:http://localhost:3000";
+    return "redirect:http://localhost:3001";
   }
 
   /**
@@ -55,7 +55,7 @@ public class AwsController {
    */
   @GetMapping("/logout")
   public String logoutAws() {
-    return "redirect:http://localhost:3000";
+    return "redirect:http://localhost:3001q";
   }
 
   /**
