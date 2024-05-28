@@ -2,6 +2,8 @@ package com.br.multicloudecore.awsmodule.service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.Versioned;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AWSS3Service {
@@ -32,21 +36,34 @@ public class AWSS3Service {
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif", "pdf", "txt");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-
-    private AWSCredentialsProvider awsCredentialsProvider;
-
-    @Value("${spring.cloud.aws.s3.bucket-name}")
-    private String bucketName;
+    private final AmazonS3 s3Client;
+    private final String bucketName;
+    private final VaultService vaultService;
 
     @Autowired
-    private VaultTemplate vaultTemplate;
+    public AWSS3Service(
+            @Value("${spring.cloud.aws.s3.bucket-name}") String bucketName,
+            VaultService vaultService
+    ) {
+        this.bucketName = bucketName;
+        this.vaultService = vaultService;
+
+        AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(
+                new BasicAWSCredentials(
+                        vaultService.getAwsCredentials().get("access_key_id").toString(),
+                        vaultService.getAwsCredentials().get("secret_access_key").toString()
+                )
+        );
+
+        this.s3Client = AmazonS3ClientBuilder.standard()
+                .withRegion(Regions.US_EAST_1)
+                .withCredentials(credentialsProvider)
+                .build();
+    }
 
     public void storeFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-       VaultResponse credentialsResponse = vaultTemplate.read("/secret/data/aws/");
-
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             LOGGER.error("File extension '{}' is not allowed for upload", extension);
@@ -58,10 +75,7 @@ public class AWSS3Service {
             throw new IllegalArgumentException("File size exceeds the maximum allowed size");
         }
 
-        final AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                .withRegion(Regions.US_EAST_1)
-                .withCredentials(awsCredentialsProvider)
-                .build();
+
         try (InputStream inputStream = file.getInputStream()) {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(file.getContentType());
@@ -72,7 +86,7 @@ public class AWSS3Service {
                     file.getOriginalFilename(),
                     inputStream, metadata);
 
-             s3.putObject(request);
+             s3Client.putObject(request);
 
         } catch (AmazonClientException e) {
             LOGGER.error("Error occurred during S3 file upload", e);
@@ -82,16 +96,11 @@ public class AWSS3Service {
     }
 
     public void uploadPhoto(BufferedImage image, String fileName) throws IOException {
-        final AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                .withRegion(Regions.US_EAST_1)
-                .withCredentials(awsCredentialsProvider)
-                .build();
-
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         javax.imageio.ImageIO.write(image, "png", os);
         byte[] imageBytes = os.toByteArray();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
 
-        s3.putObject(bucketName, fileName, inputStream, null);
+        s3Client.putObject(bucketName, fileName, inputStream, null);
     }
 }
