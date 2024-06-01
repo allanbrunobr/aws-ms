@@ -2,6 +2,7 @@ package com.br.multicloudecore.awsmodule.component;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.br.multicloudecore.awsmodule.service.AWSS3Service;
 import org.slf4j.Logger;
@@ -29,37 +30,23 @@ public class DynamicAWSCredentialsProvider implements AWSCredentialsProvider {
     private String role;
 
     public DynamicAWSCredentialsProvider(VaultTemplate vaultTemplate) {
+
         this.vaultTemplate = vaultTemplate;
     }
 
    @Override
     public AWSCredentials getCredentials() {
-        if (cachedCredentials.get() == null || Instant.now().isAfter(credentialsExpirationTime)) {
-            refresh();
-        }
-        return cachedCredentials.get();
+       Map<String, Object> awsCredentials = getAwsCredentials();
+       String accessKeyId = (String) awsCredentials.get("access_key");
+       String secretAccessKey = (String) awsCredentials.get("secret_key");
+
+       return new BasicAWSCredentials(accessKeyId, secretAccessKey);
     }
 
-    @Scheduled(fixedDelay = 3600000) // Refresh every hour
+    @Override
     public void refresh() {
-        try {Map<String, Object> awsCredentials = getAwsCredentials();
-            String accessKeyId = (String) awsCredentials.get("access_key");
-            String secretAccessKey = (String) awsCredentials.get("secret_key");
-            String securityToken = (String) awsCredentials.get("security_token");
-            Instant expirationTime = (Instant) awsCredentials.get("expiration");
 
-            AWSCredentials newCredentials = new BasicSessionCredentials(accessKeyId, secretAccessKey, securityToken);
-            cachedCredentials.set(newCredentials);
-            credentialsExpirationTime = expirationTime;
-
-            LOGGER.info("AWS credentials refreshed successfully");
-        } catch (VaultException e) {
-            LOGGER.error("Failed to refresh AWS credentials from Vault", e);
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error while refreshing AWS credentials", e);
-        }
     }
-
 
     private Map<String, Object> getAwsCredentials() {
         VaultResponse response = vaultTemplate.read("aws/creds/" + this.role);
@@ -68,20 +55,9 @@ public class DynamicAWSCredentialsProvider implements AWSCredentialsProvider {
         }
         String accessKeyId = (String) response.getData().get("access_key");
         String secretAccessKey = (String) response.getData().get("secret_key");
-        String securityToken = (String) response.getData().get("security_token");
-
-
-        if (securityToken != null) {
-            return Map.of(
-                    "access_key", accessKeyId,
-                    "secret_key", secretAccessKey,
-                    "security_token", securityToken
-            );
-        } else {
-            return Map.of(
+         return Map.of(
                     "access_key", accessKeyId,
                     "secret_key", secretAccessKey
             );
-        }}
-
+        }
 }
