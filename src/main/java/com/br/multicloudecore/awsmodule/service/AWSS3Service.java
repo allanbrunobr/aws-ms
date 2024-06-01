@@ -2,21 +2,17 @@ package com.br.multicloudecore.awsmodule.service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.*;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.br.multicloudecore.awsmodule.providers.DynamicAWSCredentialsProvider;
+import com.br.multicloudecore.awsmodule.component.DynamicAWSCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.core.VaultTemplate;
-import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.Versioned;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
@@ -26,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AWSS3Service {
