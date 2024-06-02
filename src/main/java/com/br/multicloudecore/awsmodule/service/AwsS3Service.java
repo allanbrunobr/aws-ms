@@ -23,11 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class AWSS3Service {
+public class AwsS3Service {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AWSS3Service.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsS3Service.class);
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif", "pdf", "txt");
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5L * 1024 * 1024; // 5MB
 
     private final String bucketName;
     private AmazonS3 s3Client;
@@ -35,7 +35,7 @@ public class AWSS3Service {
     private final DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider;
 
     @Autowired
-    public AWSS3Service(
+    public AwsS3Service(
             @Value("${spring.cloud.aws.s3.bucket-name}") String bucketName, DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider
     ) {
         this.bucketName = bucketName;

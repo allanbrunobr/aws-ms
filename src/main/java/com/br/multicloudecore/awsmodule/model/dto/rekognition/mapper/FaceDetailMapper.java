@@ -1,6 +1,5 @@
 package com.br.multicloudecore.awsmodule.model.dto.rekognition.mapper;
 
-import com.amazonaws.services.rekognition.model.DetectFacesResult;
 import com.amazonaws.services.rekognition.model.Emotion;
 import com.amazonaws.services.rekognition.model.FaceDetail;
 import com.amazonaws.services.rekognition.model.Landmark;
