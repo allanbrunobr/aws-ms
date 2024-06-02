@@ -71,7 +71,7 @@ public class AwsController {
   /**
    * Renders the page for the Rekognition service.
    *
-   * @return the page for the Rekognition service
+   * @return the page for the Rekognition service home
    */
   @GetMapping("/rekognition")
     public ModelAndView rekognitionAws() {

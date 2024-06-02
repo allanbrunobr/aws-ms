@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
@@ -31,18 +30,15 @@ public class AWSS3Service {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     private final String bucketName;
-    private final VaultTemplate vaultTemplate;
     private AmazonS3 s3Client;
 
     private final DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider;
 
     @Autowired
     public AWSS3Service(
-            @Value("${spring.cloud.aws.s3.bucket-name}") String bucketName,
-            VaultTemplate  vaultTemplate, DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider
+            @Value("${spring.cloud.aws.s3.bucket-name}") String bucketName, DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider
     ) {
         this.bucketName = bucketName;
-        this.vaultTemplate = vaultTemplate;
         this.dynamicAWSCredentialsProvider = dynamicAWSCredentialsProvider;
         this.s3Client = AmazonS3ClientBuilder.standard().build();
         waitForVaultCredentials();
@@ -50,7 +46,8 @@ public class AWSS3Service {
 
       public void storeFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+          assert fileName != null;
+          String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             LOGGER.error("File extension '{}' is not allowed for upload", extension);

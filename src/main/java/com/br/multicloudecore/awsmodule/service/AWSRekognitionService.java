@@ -1,11 +1,16 @@
 package com.br.multicloudecore.awsmodule.service;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.services.rekognition.AmazonRekognition;
+import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
 import com.amazonaws.services.rekognition.model.*;
 import com.amazonaws.services.rekognition.model.Image;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.util.IOUtils;
+import com.br.multicloudecore.awsmodule.component.DynamicAWSCredentialsProvider;
 import com.br.multicloudecore.awsmodule.model.dto.rekognition.mapper.FaceDetailMapper;
 import com.br.multicloudecore.awsmodule.model.dto.rekognition.output.BoundingBoxDTO;
 import com.br.multicloudecore.awsmodule.model.dto.rekognition.output.FaceInfoWithPositionDTO;
@@ -39,12 +44,16 @@ public class AWSRekognitionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AWSRekognitionService.class);
 
-    private final AWSCredentialsProvider awsCredentialsProvider;
+    private final DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider;
+    private AmazonRekognition rekognitionClient;
 
 
     @Autowired
-    public AWSRekognitionService(AWSCredentialsProvider awsCredentialsProvider) {
-        this.awsCredentialsProvider = awsCredentialsProvider;
+    public AWSRekognitionService(DynamicAWSCredentialsProvider dynamicAWSCredentialsProvider) {
+        this.dynamicAWSCredentialsProvider = dynamicAWSCredentialsProvider;
+        this.rekognitionClient = AmazonRekognitionClientBuilder.standard().build();
+        waitForVaultCredentials();
+
     }
 
     /**
@@ -61,14 +70,10 @@ public class AWSRekognitionService {
                 byte[] imageBytes = IOUtils.toByteArray(inputStream);
                 ByteBuffer imageByteBuffer = ByteBuffer.wrap(imageBytes);
 
-            AmazonRekognition rekognitionClient = AmazonRekognitionClientBuilder.standard()
-                    .withCredentials(awsCredentialsProvider)
-                    .build();
-
             DetectFacesRequest facesRequest = new DetectFacesRequest()
                     .withImage(new Image().withBytes(imageByteBuffer)).withAttributes(Attribute.ALL);
 
-            DetectFacesResult facesResult = rekognitionClient.detectFaces(facesRequest);
+            DetectFacesResult facesResult = this.rekognitionClient.detectFaces(facesRequest);
             FaceDetailMapper faceDetailMapper = new FaceDetailMapper();
 
             for (FaceDetail face : facesResult.getFaceDetails()) {
@@ -142,5 +147,26 @@ public class AWSRekognitionService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(resultImage, "jpg", baos);
         return Base64.getEncoder().encodeToString(baos.toByteArray());
+    }
+
+    private void waitForVaultCredentials() {
+        new Thread(() -> {
+            boolean credentialsAvailable = false;
+            while (!credentialsAvailable) {
+                try {
+                    this.rekognitionClient   = AmazonRekognitionClientBuilder.standard()
+                            .withCredentials(new AWSStaticCredentialsProvider(dynamicAWSCredentialsProvider.getCredentials()))
+                            .build();
+                    credentialsAvailable = true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(1000); // Wait for 1 second before retrying
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }).start();
     }
 }
